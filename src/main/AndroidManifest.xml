@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.asamm.locus.addon.graphhopper">
 
     <!-- access to card -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:label="@string/_app_name"
@@ -13,10 +15,14 @@
         android:largeHeap="true"
         android:allowBackup="false">
 
-        <activity android:name="com.asamm.locus.addon.graphhopper.SettingsActivity">
+        <activity
+            android:name="com.asamm.locus.addon.graphhopper.SettingsActivity">
+
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action
+                    android:name="android.intent.action.MAIN" />
+                <category
+                    android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
@@ -25,10 +31,13 @@
          'label' - visible as name of service in Locus
          'intent-filter' - required to make service visible
          -->
-        <service android:name="com.asamm.locus.addon.graphhopper.RoutingService"
+        <service
+            android:name="com.asamm.locus.addon.graphhopper.RoutingService"
             android:label="GraphHopper" >
+
             <intent-filter>
-                <action android:name="locus.api.android.ACTION_COMPUTE_TRACK_PROVIDER"/>
+                <action
+                    android:name="locus.api.android.ACTION_COMPUTE_TRACK_PROVIDER"/>
             </intent-filter>
         </service>
 

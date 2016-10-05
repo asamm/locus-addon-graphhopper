@@ -9,10 +9,11 @@ import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.PathWrapper;
-import com.graphhopper.routing.AlgorithmOptions;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FlagEncoder;
+import com.graphhopper.routing.util.FlagEncoderFactory;
 import com.graphhopper.util.Instruction;
+import com.graphhopper.util.Parameters;
 import com.graphhopper.util.PointList;
 import com.graphhopper.util.RoundaboutInstruction;
 import com.graphhopper.util.StopWatch;
@@ -75,24 +76,24 @@ public class RoutingService extends ComputeTrackService {
 
             // add car
             switch (encType) {
-                case EncodingManager.CAR:
+                case FlagEncoderFactory.CAR:
                     types.add(ExtraData.VALUE_RTE_TYPE_CAR_FAST);
                     types.add(ExtraData.VALUE_RTE_TYPE_CAR_SHORT);
                     break;
-                case EncodingManager.MOTORCYCLE:
+                case FlagEncoderFactory.MOTORCYCLE:
                     types.add(ExtraData.VALUE_RTE_TYPE_MOTORCYCLE);
                     break;
-                case EncodingManager.BIKE:
+                case FlagEncoderFactory.BIKE:
                     types.add(ExtraData.VALUE_RTE_TYPE_CYCLE_FAST);
                     types.add(ExtraData.VALUE_RTE_TYPE_CYCLE_SHORT);
                     break;
-                case EncodingManager.MOUNTAINBIKE:
+                case FlagEncoderFactory.MOUNTAINBIKE:
                     types.add(ExtraData.VALUE_RTE_TYPE_CYCLE_MTB);
                     break;
-                case EncodingManager.RACINGBIKE:
+                case FlagEncoderFactory.RACINGBIKE:
                     types.add(ExtraData.VALUE_RTE_TYPE_CYCLE_RACING);
                     break;
-                case EncodingManager.FOOT:
+                case FlagEncoderFactory.FOOT:
                     types.add(ExtraData.VALUE_RTE_TYPE_FOOT);
                     break;
                 default:
@@ -131,36 +132,36 @@ public class RoutingService extends ComputeTrackService {
         }
 
         // define vehicle
-        String vehicle = EncodingManager.CAR;
+        String vehicle = FlagEncoderFactory.CAR;
 		String weighting = "";
 		switch (params.getType()) {
 			case ExtraData.VALUE_RTE_TYPE_CAR_FAST:
-				vehicle = EncodingManager.CAR;
+				vehicle = FlagEncoderFactory.CAR;
 				weighting = "fastest";
 				break;
 			case ExtraData.VALUE_RTE_TYPE_CAR_SHORT:
-				vehicle = EncodingManager.CAR;
+				vehicle = FlagEncoderFactory.CAR;
 				weighting = "shortest";
 				break;
             case ExtraData.VALUE_RTE_TYPE_MOTORCYCLE:
-                vehicle = EncodingManager.MOTORCYCLE;
+                vehicle = FlagEncoderFactory.MOTORCYCLE;
                 break;
             case ExtraData.VALUE_RTE_TYPE_CYCLE_FAST:
-				vehicle = EncodingManager.BIKE;
+				vehicle = FlagEncoderFactory.BIKE;
 				weighting = "fastest";
 				break;
 			case ExtraData.VALUE_RTE_TYPE_CYCLE_SHORT:
-				vehicle = EncodingManager.BIKE;
+				vehicle = FlagEncoderFactory.BIKE;
 				weighting = "shortest";
 				break;
             case ExtraData.VALUE_RTE_TYPE_CYCLE_MTB:
-                vehicle = EncodingManager.MOUNTAINBIKE;
+                vehicle = FlagEncoderFactory.MOUNTAINBIKE;
                 break;
             case ExtraData.VALUE_RTE_TYPE_CYCLE_RACING:
-                vehicle = EncodingManager.RACINGBIKE;
+                vehicle = FlagEncoderFactory.RACINGBIKE;
                 break;
             case ExtraData.VALUE_RTE_TYPE_FOOT:
-				vehicle = EncodingManager.FOOT;
+				vehicle = FlagEncoderFactory.FOOT;
 				break;
 		}
 
@@ -185,7 +186,7 @@ public class RoutingService extends ComputeTrackService {
 		// initialize GraphHooper if required
 		if (mHopper == null || mLastRoutingItem == null || !routingItem.equals(mLastRoutingItem)) {
             GraphHopper gh = new GraphHopper().forMobile();
-            gh.setCHEnable(false);
+            gh.setCHEnabled(false);
             gh.setEnableInstructions(true);
             gh.setAllowWrites(false);
             boolean load = gh.load(routingItem.getAbsolutePath());
@@ -222,7 +223,7 @@ public class RoutingService extends ComputeTrackService {
                 req.addPoint(new GHPoint(loc.getLatitude(), loc.getLongitude()));
             }
         }
-        req.setAlgorithm(AlgorithmOptions.DIJKSTRA_BI);
+        req.setAlgorithm(Parameters.Algorithms.DIJKSTRA_BI);
         req.setVehicle(vehicle);
         req.setWeighting(weighting);
         req.getHints().
