@@ -30,7 +30,7 @@ public class Utils {
      * @param ctx current context
      * @return <code>true</code> if Locus is available
      */
-    public static boolean existsValidLocus(Context ctx) {
+    static boolean existsValidLocus(Context ctx) {
         return LocusUtils.isLocusAvailable(ctx, LocusUtils.VersionCode.UPDATE_11);
     }
 
@@ -41,7 +41,7 @@ public class Utils {
      * @param ctx current context
      * @return File as root GH directory or null if not defined or any problem happen
      */
-    public static File getRootDirectory(Context ctx) {
+    static File getRootDirectory(Context ctx) {
         // check Locus version
         if (!existsValidLocus(ctx)) {
             Logger.logW(TAG, "getAvailableData(" + ctx + "), " +
@@ -76,7 +76,7 @@ public class Utils {
      * @return list of all available routing items
      * @throws locus.api.android.utils.exceptions.RequiredVersionMissingException
      */
-    public static List<File> getAvailableData(Context ctx) throws RequiredVersionMissingException {
+    static List<File> getAvailableData(Context ctx) throws RequiredVersionMissingException {
         // container for data
         List<File> res = new ArrayList<>();
 
@@ -137,7 +137,7 @@ public class Utils {
      * @param ctx current context
      * @return defined path to routing item
      */
-	public static File getCurrentRoutingItem(Context ctx) {
+	static File getCurrentRoutingItem(Context ctx) {
 		// get and check dir
 		String dir = PreferenceManager.getDefaultSharedPreferences(ctx).
 				getString(KEY_S_DATA_ITEM_PATH, "");
@@ -158,10 +158,10 @@ public class Utils {
      * @param ctx current context
      * @param file selected item
      */
-	public static void setCurrentRoutingItem(Context ctx, File file) {
+	static void setCurrentRoutingItem(Context ctx, File file) {
 		PreferenceManager.getDefaultSharedPreferences(ctx).
 				edit().
 				putString(KEY_S_DATA_ITEM_PATH, file.getAbsolutePath()).
-				commit();
+				apply();
 	}
 }

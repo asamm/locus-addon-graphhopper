@@ -12,6 +12,9 @@ import com.graphhopper.PathWrapper;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.routing.util.FlagEncoderFactory;
+import com.graphhopper.routing.weighting.FastestWeighting;
+import com.graphhopper.routing.weighting.ShortestWeighting;
+import com.graphhopper.routing.weighting.Weighting;
 import com.graphhopper.util.Instruction;
 import com.graphhopper.util.Parameters;
 import com.graphhopper.util.PointList;
@@ -27,7 +30,8 @@ import java.util.List;
 import locus.api.android.features.computeTrack.ComputeTrackParameters;
 import locus.api.android.features.computeTrack.ComputeTrackService;
 import locus.api.android.utils.LocusUtils;
-import locus.api.objects.extra.ExtraData;
+import locus.api.objects.enums.PointRteAction;
+import locus.api.objects.extra.GeoDataExtra;
 import locus.api.objects.extra.Location;
 import locus.api.objects.extra.Track;
 import locus.api.objects.extra.Waypoint;
@@ -68,6 +72,7 @@ public class RoutingService extends ComputeTrackService {
 
         // load encoders
         EncodingManager em = getGraphHooper().getEncodingManager();
+		List<Weighting> weightings = getGraphHooper().getCHFactoryDecorator().getWeightings();
         List<Integer> types = new ArrayList<>();
 
         // get all encoders
@@ -77,24 +82,50 @@ public class RoutingService extends ComputeTrackService {
             // add car
             switch (encType) {
                 case FlagEncoderFactory.CAR:
-                    types.add(ExtraData.VALUE_RTE_TYPE_CAR_FAST);
-                    types.add(ExtraData.VALUE_RTE_TYPE_CAR_SHORT);
+                	boolean carAdded = false;
+                	for (Weighting weighting : weightings) {
+						if (weighting instanceof FastestWeighting) {
+							addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CAR_FAST, types);
+							carAdded = true;
+						} else if (weighting instanceof ShortestWeighting) {
+							addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CAR_SHORT, types);
+							carAdded = true;
+						}
+					}
+
+					// add basic "car" if no car type exists
+					if (!carAdded) {
+						addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CAR, types);
+					}
                     break;
                 case FlagEncoderFactory.MOTORCYCLE:
-                    types.add(ExtraData.VALUE_RTE_TYPE_MOTORCYCLE);
+                    addTrackType(GeoDataExtra.VALUE_RTE_TYPE_MOTORCYCLE, types);
                     break;
                 case FlagEncoderFactory.BIKE:
-                    types.add(ExtraData.VALUE_RTE_TYPE_CYCLE_FAST);
-                    types.add(ExtraData.VALUE_RTE_TYPE_CYCLE_SHORT);
+                	boolean bikeAdded = false;
+					for (Weighting weighting : weightings) {
+						if (weighting instanceof FastestWeighting) {
+							addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CYCLE_FAST, types);
+							bikeAdded = true;
+						} else if (weighting instanceof ShortestWeighting) {
+							addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CYCLE_SHORT, types);
+							bikeAdded = true;
+						}
+					}
+
+					// add basic "bike" if no bike type exists
+					if (!bikeAdded) {
+						addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CYCLE, types);
+					}
                     break;
                 case FlagEncoderFactory.MOUNTAINBIKE:
-                    types.add(ExtraData.VALUE_RTE_TYPE_CYCLE_MTB);
+                    addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CYCLE_MTB, types);
                     break;
                 case FlagEncoderFactory.RACINGBIKE:
-                    types.add(ExtraData.VALUE_RTE_TYPE_CYCLE_RACING);
+                    addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CYCLE_RACING, types);
                     break;
                 case FlagEncoderFactory.FOOT:
-                    types.add(ExtraData.VALUE_RTE_TYPE_FOOT);
+                    addTrackType(GeoDataExtra.VALUE_RTE_TYPE_FOOT_01, types);
                     break;
                 default:
                     Logger.logW(TAG, "getTrackTypes()," +
@@ -110,6 +141,17 @@ public class RoutingService extends ComputeTrackService {
         }
         return typesA;
     }
+
+	/**
+	 * Add certain type into possible routing types.
+	 * @param type type to add
+	 * @param types types container
+	 */
+	private void addTrackType(int type, List<Integer> types) {
+		if (!types.contains(type)) {
+			types.add(type);
+		}
+	}
 
     @Override
     public Intent getIntentForSettings() {
@@ -135,32 +177,38 @@ public class RoutingService extends ComputeTrackService {
         String vehicle = FlagEncoderFactory.CAR;
 		String weighting = "";
 		switch (params.getType()) {
-			case ExtraData.VALUE_RTE_TYPE_CAR_FAST:
+			case GeoDataExtra.VALUE_RTE_TYPE_CAR:
+				vehicle = FlagEncoderFactory.CAR;
+				break;
+			case GeoDataExtra.VALUE_RTE_TYPE_CAR_FAST:
 				vehicle = FlagEncoderFactory.CAR;
 				weighting = "fastest";
 				break;
-			case ExtraData.VALUE_RTE_TYPE_CAR_SHORT:
+			case GeoDataExtra.VALUE_RTE_TYPE_CAR_SHORT:
 				vehicle = FlagEncoderFactory.CAR;
 				weighting = "shortest";
 				break;
-            case ExtraData.VALUE_RTE_TYPE_MOTORCYCLE:
+            case GeoDataExtra.VALUE_RTE_TYPE_MOTORCYCLE:
                 vehicle = FlagEncoderFactory.MOTORCYCLE;
                 break;
-            case ExtraData.VALUE_RTE_TYPE_CYCLE_FAST:
+            case GeoDataExtra.VALUE_RTE_TYPE_CYCLE:
+				vehicle = FlagEncoderFactory.BIKE;
+				break;
+            case GeoDataExtra.VALUE_RTE_TYPE_CYCLE_FAST:
 				vehicle = FlagEncoderFactory.BIKE;
 				weighting = "fastest";
 				break;
-			case ExtraData.VALUE_RTE_TYPE_CYCLE_SHORT:
+			case GeoDataExtra.VALUE_RTE_TYPE_CYCLE_SHORT:
 				vehicle = FlagEncoderFactory.BIKE;
 				weighting = "shortest";
 				break;
-            case ExtraData.VALUE_RTE_TYPE_CYCLE_MTB:
+            case GeoDataExtra.VALUE_RTE_TYPE_CYCLE_MTB:
                 vehicle = FlagEncoderFactory.MOUNTAINBIKE;
                 break;
-            case ExtraData.VALUE_RTE_TYPE_CYCLE_RACING:
+            case GeoDataExtra.VALUE_RTE_TYPE_CYCLE_RACING:
                 vehicle = FlagEncoderFactory.RACINGBIKE;
                 break;
-            case ExtraData.VALUE_RTE_TYPE_FOOT:
+            case GeoDataExtra.VALUE_RTE_TYPE_FOOT_01:
 				vehicle = FlagEncoderFactory.FOOT;
 				break;
 		}
@@ -290,25 +338,25 @@ public class RoutingService extends ComputeTrackService {
                 // create instruction waypoint
                 Waypoint wpt = new Waypoint();
                 wpt.setLocation(firstLoc);
-                wpt.addParameter(ExtraData.PAR_RTE_POINT_ACTION,
-                        graphHopperActionToLocus(inst));
+                wpt.addParameter(GeoDataExtra.PAR_RTE_POINT_ACTION,
+                        graphHopperActionToLocus(inst).getId());
 
                 // set name
                 if (inst.getName().length() > 0) {
-                    wpt.addParameter(ExtraData.PAR_RTE_STREET, inst.getName());
+                    wpt.addParameter(GeoDataExtra.PAR_RTE_STREET, inst.getName());
                 }
 
                 // set speed and distance parameters
-                wpt.addParameter(ExtraData.PAR_RTE_DISTANCE_F,
+                wpt.addParameter(GeoDataExtra.PAR_RTE_DISTANCE_F,
                         Float.toString((float) inst.getDistance()));
-                wpt.addParameter(ExtraData.PAR_RTE_TIME_I,
+                wpt.addParameter(GeoDataExtra.PAR_RTE_TIME_I,
                         (int) (inst.getTime() / 1000.0));
                 track.getWaypoints().add(wpt);
 
                 // use "Via instruction"
                 if (viaInstruction != null) {
-                    wpt.addParameter(ExtraData.PAR_RTE_POINT_ACTION,
-                            ExtraData.VALUE_RTE_ACTION_PASS_PLACE);
+                    wpt.addParameter(GeoDataExtra.PAR_RTE_POINT_ACTION,
+							PointRteAction.PASS_PLACE.getId());
                     viaInstruction = null;
                 }
 
@@ -355,7 +403,7 @@ public class RoutingService extends ComputeTrackService {
      * @param inst instruction on certain place
      * @return code of action in Locus system
      */
-    private int graphHopperActionToLocus(Instruction inst) {
+    private PointRteAction graphHopperActionToLocus(Instruction inst) {
         // get roundabout
         if (inst.getSign() == Instruction.USE_ROUNDABOUT) {
 
@@ -363,12 +411,11 @@ public class RoutingService extends ComputeTrackService {
             // then notify incorrect exit
             if (inst instanceof RoundaboutInstruction) {
                 RoundaboutInstruction instRb = (RoundaboutInstruction) inst;
-                return ExtraData.VALUE_RTE_ACTION_ROUNDABOUT_EXIT_1 +
-                        (instRb.getExitNumber() - 1);
+                return PointRteAction.getActionRoundabout(instRb.getExitNumber());
             } else {
                 Logger.logW(TAG, "graphHopperActionToLocus(" + inst + "), " +
                         "invalid Roundabout instruction");
-                return ExtraData.VALUE_RTE_ACTION_NO_MANEUVER;
+                return PointRteAction.NO_MANEUVER;
             }
         }
 
@@ -378,36 +425,41 @@ public class RoutingService extends ComputeTrackService {
             // TURN RIGHT
 
             case Instruction.TURN_SLIGHT_RIGHT:
-                return ExtraData.VALUE_RTE_ACTION_RIGHT_SLIGHT;
+                return PointRteAction.RIGHT_SLIGHT;
             case Instruction.TURN_RIGHT:
-                return ExtraData.VALUE_RTE_ACTION_RIGHT;
+                return PointRteAction.RIGHT;
             case Instruction.TURN_SHARP_RIGHT:
-                return ExtraData.VALUE_RTE_ACTION_RIGHT_SHARP;
+                return PointRteAction.RIGHT_SHARP;
 
             // TURN LEFT
 
             case Instruction.TURN_SLIGHT_LEFT:
-                return ExtraData.VALUE_RTE_ACTION_LEFT_SLIGHT;
+                return PointRteAction.LEFT_SLIGHT;
             case Instruction.TURN_LEFT:
-                return ExtraData.VALUE_RTE_ACTION_LEFT;
+                return PointRteAction.LEFT;
             case Instruction.TURN_SHARP_LEFT:
-                return ExtraData.VALUE_RTE_ACTION_LEFT_SHARP;
+                return PointRteAction.LEFT_SHARP;
 
             // VARIOUS
 
             case Instruction.CONTINUE_ON_STREET:
-                return ExtraData.VALUE_RTE_ACTION_CONTINUE_STRAIGHT;
+                return PointRteAction.CONTINUE_STRAIGHT;
+			case Instruction.KEEP_RIGHT:
+				return PointRteAction.STAY_RIGHT;
+			case Instruction.KEEP_LEFT:
+				return PointRteAction.STAY_LEFT;
+
             case Instruction.FINISH:
-                return ExtraData.VALUE_RTE_ACTION_ARRIVE_DEST;
+                return PointRteAction.ARRIVE_DEST;
             case Instruction.REACHED_VIA:
-                return ExtraData.VALUE_RTE_ACTION_PASS_PLACE;
+                return PointRteAction.PASS_PLACE;
 
             // IGNORED
 
             case Instruction.LEAVE_ROUNDABOUT:
-                return ExtraData.VALUE_RTE_ACTION_NO_MANEUVER;
+                return PointRteAction.NO_MANEUVER;
             default:
-                return ExtraData.VALUE_RTE_ACTION_NO_MANEUVER;
+                return PointRteAction.NO_MANEUVER;
         }
     }
 }

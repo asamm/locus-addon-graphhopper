@@ -5,8 +5,8 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        versionCode 10
-        versionName '0.3'
+        versionCode 11
+        versionName '0.4'
 
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
@@ -65,17 +65,18 @@ android {
 
 dependencies {
     // get locus API
-    compile 'com.asamm:locus-api-android:0.2.6'
+    compile 'com.asamm:locus-api-android:0.2.10'
 
-    // add current GraphHopper
-    // https://mvnrepository.com/artifact/com.graphhopper/graphhopper-web
-    compile(group: 'com.graphhopper', name: 'graphhopper', version: '0.7.0') {
+    // add GraphHopper dependency
+    // https://github.com/graphhopper/graphhopper/tree/master/android
+    compile(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.9.0') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
         exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
         exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
     }
-    compile 'org.slf4j:slf4j-simple:1.7.12'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'org.slf4j:slf4j-android:1.7.25'
 
     // Android support libraries
-    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:appcompat-v7:25.3.1'
 }
