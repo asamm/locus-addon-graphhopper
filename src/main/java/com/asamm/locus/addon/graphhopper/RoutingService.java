@@ -24,8 +24,12 @@ import com.graphhopper.util.ViaInstruction;
 import com.graphhopper.util.shapes.GHPoint;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import locus.api.android.features.computeTrack.ComputeTrackParameters;
 import locus.api.android.features.computeTrack.ComputeTrackService;
@@ -50,6 +54,9 @@ public class RoutingService extends ComputeTrackService {
     private GraphHopper mHopper;
 	// remember last used map path
 	private File mLastRoutingItem;
+
+	// flag if we have "bike2" mode in latest loaded file
+	private boolean mBike2Encoding;
 
     @Override
     public void onCreate() {
@@ -102,6 +109,7 @@ public class RoutingService extends ComputeTrackService {
                     addTrackType(GeoDataExtra.VALUE_RTE_TYPE_MOTORCYCLE, types);
                     break;
                 case FlagEncoderFactory.BIKE:
+				case FlagEncoderFactory.BIKE2:
                 	boolean bikeAdded = false;
 					for (Weighting weighting : weightings) {
 						if (weighting instanceof FastestWeighting) {
@@ -117,7 +125,12 @@ public class RoutingService extends ComputeTrackService {
 					if (!bikeAdded) {
 						addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CYCLE, types);
 					}
-                    break;
+
+					// enable "Bike2" encoding
+					if (encType.equalsIgnoreCase(FlagEncoderFactory.BIKE2)) {
+						mBike2Encoding = true;
+					}
+					break;
                 case FlagEncoderFactory.MOUNTAINBIKE:
                     addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CYCLE_MTB, types);
                     break;
@@ -192,14 +205,26 @@ public class RoutingService extends ComputeTrackService {
                 vehicle = FlagEncoderFactory.MOTORCYCLE;
                 break;
             case GeoDataExtra.VALUE_RTE_TYPE_CYCLE:
-				vehicle = FlagEncoderFactory.BIKE;
+            	if (mBike2Encoding) {
+					vehicle = FlagEncoderFactory.BIKE2;
+				} else {
+					vehicle = FlagEncoderFactory.BIKE;
+				}
 				break;
             case GeoDataExtra.VALUE_RTE_TYPE_CYCLE_FAST:
-				vehicle = FlagEncoderFactory.BIKE;
+				if (mBike2Encoding) {
+					vehicle = FlagEncoderFactory.BIKE2;
+				} else {
+					vehicle = FlagEncoderFactory.BIKE;
+				}
 				weighting = "fastest";
 				break;
 			case GeoDataExtra.VALUE_RTE_TYPE_CYCLE_SHORT:
-				vehicle = FlagEncoderFactory.BIKE;
+				if (mBike2Encoding) {
+					vehicle = FlagEncoderFactory.BIKE2;
+				} else {
+					vehicle = FlagEncoderFactory.BIKE;
+				}
 				weighting = "shortest";
 				break;
             case GeoDataExtra.VALUE_RTE_TYPE_CYCLE_MTB:
@@ -232,29 +257,97 @@ public class RoutingService extends ComputeTrackService {
 		}
 
 		// initialize GraphHooper if required
-		if (mHopper == null || mLastRoutingItem == null || !routingItem.equals(mLastRoutingItem)) {
-            GraphHopper gh = new GraphHopper().forMobile();
-            gh.setCHEnabled(false);
-            gh.setEnableInstructions(true);
-            gh.setAllowWrites(false);
-            boolean load = gh.load(routingItem.getAbsolutePath());
-            Logger.logD(TAG, "found graph " + gh.getGraphHopperStorage() + ", " +
-                    "nodes:" + gh.getGraphHopperStorage().getNodes() + ", " +
-                    "path:" + routingItem.getAbsolutePath() + ", " +
-                    "load:" + load);
+		try {
+			if (mHopper == null || mLastRoutingItem == null || !routingItem.equals(mLastRoutingItem)) {
+				// reset parameters
+				mBike2Encoding = false;
 
-			// store result
-            if (load) {
-                mHopper = gh;
-                mLastRoutingItem = routingItem;
-            } else {
-                mHopper = null;
-            }
-        }
+				// initialize graphHopper
+				GraphHopper gh = new GraphHopper().forMobile();
+				setGraphHopperProperties(gh, routingItem);
+				boolean load = gh.load(routingItem.getAbsolutePath());
+				Logger.logD(TAG, "found graph " + gh.getGraphHopperStorage() + ", " +
+						"nodes:" + gh.getGraphHopperStorage().getNodes() + ", " +
+						"path:" + routingItem.getAbsolutePath() + ", " +
+						"load:" + load);
+
+				// store result
+				if (load) {
+					mHopper = gh;
+					mLastRoutingItem = routingItem;
+				} else {
+					mHopper = null;
+				}
+			}
+		} catch (IOException e) {
+			Logger.logE(TAG, "getGraphHooper()", e);
+			mHopper = null;
+		}
 
         // return initialized GraphHopper
         return mHopper;
     }
+
+	/**
+	 * Set parameters based on properties file.
+	 * @param gh graphHopper instance
+	 * @throws IOException excetion in case of any problems with loading properties file
+	 */
+	private void setGraphHopperProperties(GraphHopper gh, File routingItem) throws IOException {
+		// set default parameters
+		gh.setEnableInstructions(true);
+		gh.setAllowWrites(false);
+		gh.setCHEnabled(false);
+		gh.setElevation(false);
+
+		// load properties file
+		byte[] filePropData = readFile(new File(routingItem, "properties"));
+		if (filePropData == null || filePropData.length == 0) {
+			return;
+		}
+		String fileProp = new String(filePropData);
+
+		// test weighting
+		Pattern patternWei = Pattern.compile("graph\\.ch\\.weightings=\\[(.*)\\]");
+		Matcher matcherWei = patternWei.matcher(fileProp);
+		if (matcherWei.find()) {
+			gh.setCHEnabled(matcherWei.group(1).length() > 0);
+		}
+
+		// test elevation
+		Pattern patternEle = Pattern.compile("graph\\.dimension=(\\d)");
+		Matcher matcherEle = patternEle.matcher(fileProp);
+		if (matcherEle.find()) {
+			gh.setElevation(Integer.parseInt(matcherEle.group(1)) > 2);
+		}
+	}
+
+	/**
+	 * Read content of a file into in-memory byte array.
+	 * @param file file to load
+	 * @return loaded data
+	 * @throws IOException exception in case of any problem
+	 */
+	private byte[] readFile(File file) throws IOException {
+		// Open file
+		RandomAccessFile f = null;
+		try {
+			// Get and check length
+			f = new RandomAccessFile(file, "r");
+			long longlength = f.length();
+			int length = (int) longlength;
+			if (length != longlength)
+				throw new IOException("File size >= 2 GB");
+			// Read file and return data
+			byte[] data = new byte[length];
+			f.readFully(data);
+			return data;
+		} finally {
+			if (f != null) {
+				f.close();
+			}
+		}
+	}
 
     private Track calcPath(Location[] locs, String vehicle, String weighting,
             double firstPointDirection, boolean instructions) {
