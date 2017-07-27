@@ -140,6 +140,9 @@ public class RoutingService extends ComputeTrackService {
                 case FlagEncoderFactory.FOOT:
                     addTrackType(GeoDataExtra.VALUE_RTE_TYPE_FOOT_01, types);
                     break;
+				case FlagEncoderFactory.HIKE:
+					addTrackType(GeoDataExtra.VALUE_RTE_TYPE_FOOT_02, types);
+					break;
                 default:
                     Logger.logW(TAG, "getTrackTypes()," +
                             "unsupported type:" + encType);
@@ -235,6 +238,9 @@ public class RoutingService extends ComputeTrackService {
                 break;
             case GeoDataExtra.VALUE_RTE_TYPE_FOOT_01:
 				vehicle = FlagEncoderFactory.FOOT;
+				break;
+			case GeoDataExtra.VALUE_RTE_TYPE_FOOT_02:
+				vehicle = FlagEncoderFactory.HIKE;
 				break;
 		}
 

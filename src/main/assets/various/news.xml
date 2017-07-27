@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="windows-1250"?>
+<document>
+
+    <update name="0.4.2" id="13" time="27.7.2017">
+        <li>add: support for "hike" routing encoding</li>
+    </update>
+
+    <update name="0.4.1" id="12" time="26.7.2017">
+        <li>add: support for Bike2 weighting</li>
+        <li>add: support for dynamic loading of parameters from "parameters" file => support for CH and 3-D files</li>
+    </update>
+
+    <update name="0.4.0" id="11" time="25.7.2017">
+        <li>chg: updated GH library to v. 0.9.0</li>
+        <li>chg: updated Locus API to v. 0.2.10</li>
+    </update>
+
+    <update name="0.3" id="10" time="5.10.2016">
+        <li>chg: updated to Locus API 0.2.6</li>
+        <li>chg: updated to GraphHopper API 0.7</li>
+        <li>add: readme and license files</li>
+    </update>
+
+    <update name="0.2" id="9" time="31.5.2016">
+        <li>add: initial version</li>
+    </update>
+
+</document>
