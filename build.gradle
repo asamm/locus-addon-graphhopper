@@ -1,82 +1,22 @@
-apply plugin: 'com.android.application'
-
-android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    defaultConfig {
-        versionCode 13
-        versionName '0.4.2'
-
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+buildscript {
+    
+    repositories {
+        google()
+        jcenter()
     }
-
-    packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
-
-    // set lint in project
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
-    }
-
-    // signing of versions
-    signingConfigs {
-        debug {
-            // "~/.android/debug.keystore"
-            storeFile file(rootProject.ext.signDebugPath)
-            storePassword = rootProject.ext.signDebugPassword
-            keyAlias = rootProject.ext.signDebugKeyAlias
-            keyPassword = rootProject.ext.signDebugKeyPassword
-        }
-        release {
-            storeFile file(rootProject.ext.signReleasePath)
-            storePassword = rootProject.ext.signReleasePassword
-            keyAlias = rootProject.ext.signReleaseKeyAlias
-            keyPassword = rootProject.ext.signReleaseKeyPassword
-        }
-    }
-
-    // building task
-    buildTypes {
-        debug {
-            signingConfig signingConfigs.debug
-        }
-        release {
-            signingConfig signingConfigs.release
-        }
-    }
-
-    // product flavors
-    productFlavors {
-        addonGraphHopper {
-            applicationId 'com.asamm.locus.addon.graphhopper'
-        }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:' + BUILD_TOOLS
     }
 }
 
-dependencies {
-    // get locus API
-    compile 'com.asamm:locus-api-android:0.2.10'
-
-    // add GraphHopper dependency
-    // https://github.com/graphhopper/graphhopper/tree/master/android
-    compile(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.9.0') {
-        exclude group: 'com.google.protobuf', module: 'protobuf-java'
-        exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
-        exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url "https://oss.sonatype.org/content/groups/public/" }
     }
-    compile 'org.slf4j:slf4j-api:1.7.25'
-    compile 'org.slf4j:slf4j-android:1.7.25'
+}
 
-    // Android support libraries
-    compile 'com.android.support:appcompat-v7:25.3.1'
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }

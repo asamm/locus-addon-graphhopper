@@ -1,0 +1,91 @@
+apply plugin: 'com.android.application'
+
+android {
+    // defaults
+    compileSdkVersion Integer.valueOf(PARAM_COMPILE_SDK_VERSION)
+    buildToolsVersion PARAM_BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        minSdkVersion Integer.valueOf(PARAM_MIN_SDK_VERSION)
+        targetSdkVersion Integer.valueOf(PARAM_TARGET_SDK_VERSION)
+
+        versionCode 13
+        versionName '0.4.2'
+    }
+
+    // exclude from result
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
+    // compile options
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // set lint in project
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    // signing of versions
+    signingConfigs {
+        debug {
+            storeFile file(SIGN_DEBUG_STORE_FILE)
+            storePassword = SIGN_DEBUG_STORE_PASSWORD
+            keyAlias = SIGN_DEBUG_KEY_ALIAS
+            keyPassword = SIGN_DEBUG_KEY_PASSWORD
+        }
+        release {
+            storeFile file(SIGN_RELEASE_STORE_FILE)
+            storePassword = SIGN_RELEASE_STORE_PASSWORD
+            keyAlias = SIGN_RELEASE_KEY_ALIAS
+            keyPassword = SIGN_RELEASE_KEY_PASSWORD
+        }
+    }
+
+    // building task
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.release
+
+            // enable ProGuard
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard-rules.pro'
+        }
+    }
+
+    // product flavors
+    flavorDimensions "basic"
+    productFlavors {
+        addonGraphHopper {
+            applicationId "com.asamm.locus.addon.graphhopper"
+            dimension "basic"
+        }
+    }
+}
+
+dependencies {
+    // Android support libraries
+    implementation 'com.android.support:appcompat-v7:' + LIB_ANDROID_SUPPORT
+
+    // get locus API
+    compile 'com.asamm:locus-api-android:0.2.19'
+
+    // add GraphHopper dependency
+    // https://github.com/graphhopper/graphhopper/tree/master/android
+    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.10-SNAPSHOT') {
+        exclude group: 'com.google.protobuf', module: 'protobuf-java'
+        exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
+        exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
+    }
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'org.slf4j:slf4j-android:1.7.25'
+}
