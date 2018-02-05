@@ -73,11 +73,11 @@ android {
 }
 
 dependencies {
+    // Locus API
+    compile 'com.asamm:locus-api-android:0.2.19'
+
     // Android support libraries
     implementation 'com.android.support:appcompat-v7:' + LIB_ANDROID_SUPPORT
-
-    // get locus API
-    compile 'com.asamm:locus-api-android:0.2.19'
 
     // add GraphHopper dependency
     // https://github.com/graphhopper/graphhopper/tree/master/android

@@ -1,4 +1,4 @@
-# Locus Map - add-on GraphHopper
+# GraphHopper for Locus Map ![logo](app/src/main/res/drawable-mdpi/ic_launcher.png "Contacts for Locus Map logo")
 
 Add-on for [Locus Map](http://www.locusmap.eu) (Android) application, created to offer offline routing capabilities to Locus Map.
 
