@@ -9,8 +9,8 @@ android {
         minSdkVersion Integer.valueOf(PARAM_MIN_SDK_VERSION)
         targetSdkVersion Integer.valueOf(PARAM_TARGET_SDK_VERSION)
 
-        versionCode 13
-        versionName '0.4.2'
+        versionCode 14
+        versionName '0.5'
     }
 
     // exclude from result
@@ -55,10 +55,10 @@ android {
         release {
             signingConfig signingConfigs.release
 
-            // enable ProGuard
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'),
-                    'proguard-rules.pro'
+//            // enable ProGuard
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+//                    'proguard-rules.pro'
         }
     }
 
@@ -74,14 +74,14 @@ android {
 
 dependencies {
     // Locus API
-    compile 'com.asamm:locus-api-android:0.2.19'
+    compile 'com.asamm:locus-api-android:' + LIB_LOCUS_API
 
     // Android support libraries
     implementation 'com.android.support:appcompat-v7:' + LIB_ANDROID_SUPPORT
 
     // add GraphHopper dependency
     // https://github.com/graphhopper/graphhopper/tree/master/android
-    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.10-SNAPSHOT') {
+    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.10-SNAPSHOT', changing: true) {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
         exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
         exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'

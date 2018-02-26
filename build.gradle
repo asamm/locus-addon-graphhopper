@@ -20,3 +20,8 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}

@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5] - 2018-02-26
+### Changes
+- updated to Locus API 0.2.19
+- updated to GraphHopper API 0.10-SNAPSHOT
+
 ## [0.3] - 2016-10-05
 ### Changed
 - updated to Locus API 0.2.6
