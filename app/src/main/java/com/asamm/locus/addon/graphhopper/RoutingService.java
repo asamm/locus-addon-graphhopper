@@ -370,7 +370,6 @@ public class RoutingService extends ComputeTrackService {
                 req.addPoint(new GHPoint(loc.getLatitude(), loc.getLongitude()));
             }
         }
-        req.setAlgorithm(Parameters.Algorithms.DIJKSTRA_BI);
         req.setVehicle(vehicle);
         req.setWeighting(weighting);
         req.getHints().
