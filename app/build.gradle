@@ -9,8 +9,8 @@ android {
         minSdkVersion Integer.valueOf(PARAM_MIN_SDK_VERSION)
         targetSdkVersion Integer.valueOf(PARAM_TARGET_SDK_VERSION)
 
-        versionCode 14
-        versionName '0.5'
+        versionCode 15
+        versionName '0.6'
     }
 
     // exclude from result
@@ -81,11 +81,11 @@ dependencies {
 
     // add GraphHopper dependency
     // https://github.com/graphhopper/graphhopper/tree/master/android
-    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.10-SNAPSHOT', changing: true) {
+    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.11.0-pre1') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
         exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
         exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
     }
-    compile 'org.slf4j:slf4j-api:1.7.25'
-    compile 'org.slf4j:slf4j-android:1.7.25'
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.slf4j:slf4j-android:1.7.25'
 }
