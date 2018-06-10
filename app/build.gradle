@@ -74,18 +74,18 @@ android {
 
 dependencies {
     // Locus API
-    compile 'com.asamm:locus-api-android:' + LIB_LOCUS_API
+    api 'com.asamm:locus-api-android:' + LIB_LOCUS_API
 
     // Android support libraries
     implementation 'com.android.support:appcompat-v7:' + LIB_ANDROID_SUPPORT
 
     // add GraphHopper dependency
     // https://github.com/graphhopper/graphhopper/tree/master/android
-    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.10-SNAPSHOT', changing: true) {
+    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.10.0') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
         exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
         exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
     }
-    compile 'org.slf4j:slf4j-api:1.7.25'
-    compile 'org.slf4j:slf4j-android:1.7.25'
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.slf4j:slf4j-android:1.7.25'
 }

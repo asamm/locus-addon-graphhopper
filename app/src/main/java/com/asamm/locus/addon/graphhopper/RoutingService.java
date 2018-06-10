@@ -370,7 +370,9 @@ public class RoutingService extends ComputeTrackService {
                 req.addPoint(new GHPoint(loc.getLatitude(), loc.getLongitude()));
             }
         }
-        req.setAlgorithm(Parameters.Algorithms.DIJKSTRA_BI);
+        // disabled based on 'develar' suggestion. Needs test.
+        // https://github.com/asamm/locus-addon-graphhopper/pull/1#issuecomment-395942217
+        //req.setAlgorithm(Parameters.Algorithms.DIJKSTRA_BI);
         req.setVehicle(vehicle);
         req.setWeighting(weighting);
         req.getHints().
