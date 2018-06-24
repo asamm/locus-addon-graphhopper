@@ -297,7 +297,7 @@ public class RoutingService extends ComputeTrackService {
 	/**
 	 * Set parameters based on properties file.
 	 * @param gh graphHopper instance
-	 * @throws IOException excetion in case of any problems with loading properties file
+	 * @throws IOException exception in case of any problems with loading properties file
 	 */
 	private void setGraphHopperProperties(GraphHopper gh, File routingItem) throws IOException {
 		// set default parameters
