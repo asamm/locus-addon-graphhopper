@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: "kotlin-android"
 
 android {
     // defaults
@@ -73,6 +74,9 @@ android {
 }
 
 dependencies {
+    // Kotlin
+    api 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:' + KOTLIN_VERSION
+
     // Locus API
     implementation 'com.asamm:locus-api-android:' + LIB_LOCUS_API
 
@@ -81,7 +85,8 @@ dependencies {
 
     // add GraphHopper dependency
     // https://github.com/graphhopper/graphhopper/tree/master/android
-    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.10.0') {
+    // https://mvnrepository.com/artifact/com.graphhopper/graphhopper-core
+    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '1.0-pre18') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
         exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
         exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
