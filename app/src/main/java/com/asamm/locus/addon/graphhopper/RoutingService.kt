@@ -11,14 +11,14 @@ import android.widget.Toast
 import com.graphhopper.GHRequest
 import com.graphhopper.GHResponse
 import com.graphhopper.GraphHopper
+import com.graphhopper.routing.util.DefaultFlagEncoderFactory
+import com.graphhopper.routing.util.EncodingManager
 import com.graphhopper.routing.util.FlagEncoderFactory
 import com.graphhopper.routing.weighting.FastestWeighting
 import com.graphhopper.routing.weighting.ShortestWeighting
-import com.graphhopper.util.Instruction
-import com.graphhopper.util.PointList
-import com.graphhopper.util.RoundaboutInstruction
-import com.graphhopper.util.StopWatch
-import com.graphhopper.util.ViaInstruction
+import com.graphhopper.storage.RAMDirectory
+import com.graphhopper.storage.StorableProperties
+import com.graphhopper.util.*
 import com.graphhopper.util.shapes.GHPoint
 import locus.api.android.features.computeTrack.ComputeTrackParameters
 import locus.api.android.features.computeTrack.ComputeTrackService
@@ -31,9 +31,7 @@ import locus.api.objects.geoData.Track
 import locus.api.utils.Logger
 import java.io.File
 import java.io.IOException
-import java.io.RandomAccessFile
 import java.util.*
-import java.util.regex.Pattern
 
 /**
  * Main routing service that do all heavy work with compute of required route.
@@ -43,7 +41,7 @@ class RoutingService : ComputeTrackService() {
     // instance of GraphHooper engine
     private var hopper: GraphHopper? = null
         get() {
-            val routingItem = Utils.getCurrentRoutingItem(this)
+            val routingItem = Utils.getCurrentRoutingItem(this)?.absoluteFile
                     ?: throw IllegalArgumentException("No valid routing item selected")
             try {
                 // check current selected map
@@ -57,11 +55,11 @@ class RoutingService : ComputeTrackService() {
                     setGraphHopperProperties(gh, routingItem)
 
                     // initialize graphHopper
-                    val load = gh.load(routingItem.absolutePath)
-                    Logger.logD(TAG, "found graph " + gh.graphHopperStorage + ", " +
-                            "nodes:" + gh.graphHopperStorage.nodes + ", " +
-                            "path:" + routingItem.absolutePath + ", " +
-                            "load:" + load)
+                    val load = gh.load(routingItem.path)
+                    Logger.logD(TAG, "found graph ${gh.graphHopperStorage}, " +
+                      "nodes: ${gh.graphHopperStorage.nodes}, " +
+                      "path: ${routingItem.path}, " +
+                      "load: $load")
 
                     // store result
                     if (load) {
@@ -84,23 +82,24 @@ class RoutingService : ComputeTrackService() {
     private var lastRoutingItem: File? = null
 
     // flag if we have "bike2" mode in latest loaded file
-    private var bike2Encoding: Boolean = false
+    private var bike2Encoding = false
 
     override val attribution: String
-        get() = "Powered by <a href=\"http://graphhopper.com/#enterprise\">GraphHopper API</a>"
+        get() = "Powered by <a href=\"https://graphhopper.com/#enterprise\">GraphHopper API</a>"
 
     override val trackTypes: IntArray
         get() {
             // initialize graphHopper instance
-            if (hopper == null) {
-                Logger.logW(TAG, "getTrackTypes()," + "unable to initialize GraphHopper instance")
+          val hopper = hopper
+          if (hopper == null) {
+                Logger.logW(TAG, "getTrackTypes(), unable to initialize GraphHopper instance")
                 return IntArray(0)
             }
 
             // load encoders
             val types = ArrayList<Int>()
-            val em = hopper!!.encodingManager
-            val profiles = hopper!!.chFactoryDecorator.chProfiles
+            val em = hopper.encodingManager
+            val profiles = hopper.chFactoryDecorator.chProfiles
 
             // get all encoders
             for (enc in em.fetchEdgeEncoders()) {
@@ -164,8 +163,7 @@ class RoutingService : ComputeTrackService() {
                     FlagEncoderFactory.RACINGBIKE -> {
                         addTrackType(GeoDataExtra.VALUE_RTE_TYPE_CYCLE_RACING, types)
                     }
-                    else -> Logger.logW(TAG, "getTrackTypes()," +
-                            "unsupported type:" + encType)
+                    else -> Logger.logW(TAG, "getTrackTypes(), unsupported type:$encType")
                 }
             }
 
@@ -196,9 +194,8 @@ class RoutingService : ComputeTrackService() {
 
     override fun computeTrack(lv: LocusVersion?, params: ComputeTrackParameters): Track? {
         // check instance of GraphHopper
-        if (hopper == null) {
-            Logger.logW(TAG, "computeTrack(" + params + ")," +
-                    "unable to initialize GraphHopper instance")
+      if (hopper == null) {
+            Logger.logW(TAG, "computeTrack($params), unable to initialize GraphHopper instance")
             return null
         }
 
@@ -280,9 +277,6 @@ class RoutingService : ComputeTrackService() {
             }
         }
 
-        // disabled based on 'develar' suggestion. Needs test.
-        // https://github.com/asamm/locus-addon-graphhopper/pull/1#issuecomment-395942217
-        //req.setAlgorithm(Parameters.Algorithms.DIJKSTRA_BI);
         req.vehicle = vehicle
         req.weighting = weighting
         req.hints.put("instructions", instructions).put("douglas.minprecision", 1)
@@ -421,8 +415,7 @@ class RoutingService : ComputeTrackService() {
             return if (inst is RoundaboutInstruction) {
                 PointRteAction.getActionRoundabout(inst.exitNumber)
             } else {
-                Logger.logW(TAG, "graphHopperActionToLocus(" + inst + "), " +
-                        "invalid Roundabout instruction")
+                Logger.logW(TAG, "graphHopperActionToLocus($inst), invalid Roundabout instruction")
                 PointRteAction.NO_MANEUVER
             }
         }
@@ -468,57 +461,34 @@ class RoutingService : ComputeTrackService() {
      * @param gh graphHopper instance
      * @throws IOException exception in case of any problems with loading properties file
      */
-    @Throws(IOException::class)
     private fun setGraphHopperProperties(gh: GraphHopper, routingItem: File) {
         // set default parameters
-        // gh.setEnableInstructions(true); not available in 0.12, alternative?
         gh.isAllowWrites = false
-        gh.isCHEnabled = false
-        gh.setElevation(false)
 
         // load properties file
-        val filePropData = readFile(File(routingItem, "properties"))
-        if (filePropData == null || filePropData.isEmpty()) {
-            return
-        }
-        val fileProp = String(filePropData)
-
-        // test weighting
-        val patternWei = Pattern.compile("graph\\.ch\\.weightings=\\[(.*)]")
-        val matcherWei = patternWei.matcher(fileProp)
-        if (matcherWei.find()) {
-            gh.isCHEnabled = matcherWei.group(1).isNotEmpty()
+        val dir = RAMDirectory(routingItem.path, true)
+        val properties = StorableProperties(dir)
+        if (!properties.loadExisting()) {
+          throw IllegalStateException("Cannot load properties to fetch EncodingManager configuration at: ${dir.location}")
         }
 
-        // test elevation
-        val patternEle = Pattern.compile("graph\\.dimension=(\\d)")
-        val matcherEle = patternEle.matcher(fileProp)
-        if (matcherEle.find()) {
-            gh.setElevation(Integer.parseInt(matcherEle.group(1)) > 2)
+        // following code is not necessary - GraphHopper will create proper EncodingManager on demand,
+        // but as in any case we load properties to configure CH and elevation, let's set EncodingManager explicitly
+        val builder = EncodingManager.Builder()
+        // enableInstructions is true by default, but to make sure
+        builder.setEnableInstructions(true)
+        properties.get("graph.encoded_values").takeIf { it.isNotBlank() }?.let {
+          builder.addAll(gh.encodedValueFactory, it)
         }
-    }
+        // GraphHopper doesn't expose flagEncoderFactory, but it is ok - stateless DefaultFlagEncoderFactory is used.
+        properties.get("graph.flag_encoders").takeIf { it.isNotBlank() }?.let {
+          builder.addAll(DefaultFlagEncoderFactory(), it)
+        }
 
-    /**
-     * Read content of a file into in-memory byte array.
-     *
-     * @param file file to load
-     * @return loaded data
-     * @throws IOException exception in case of any problem
-     */
-    @Throws(IOException::class)
-    private fun readFile(file: File): ByteArray? {
-        // Open file
-        RandomAccessFile(file, "r").use { f ->
-            // Get and check length
-            val longLength = f.length()
-            val length = longLength.toInt()
-            if (length.toLong() != longLength)
-                throw IOException("File size >= 2 GB")
-            // Read file and return data
-            val data = ByteArray(length)
-            f.readFully(data)
-            return data
-        }
+        gh.encodingManager = builder.build()
+
+        gh.isCHEnabled = (properties.get("prepare.ch.done") == "true")
+        gh.setElevation(properties.get("prepare.elevation_interpolation.done") == "true")
     }
 
     companion object {
