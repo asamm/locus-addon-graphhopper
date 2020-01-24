@@ -57,9 +57,9 @@ class RoutingService : ComputeTrackService() {
                     // initialize graphHopper
                     val load = gh.load(routingItem.path)
                     Logger.logD(TAG, "found graph ${gh.graphHopperStorage}, " +
-                      "nodes: ${gh.graphHopperStorage.nodes}, " +
-                      "path: ${routingItem.path}, " +
-                      "load: $load")
+                            "nodes: ${gh.graphHopperStorage.nodes}, " +
+                            "path: ${routingItem.path}, " +
+                            "load: $load")
 
                     // store result
                     if (load) {
@@ -90,8 +90,8 @@ class RoutingService : ComputeTrackService() {
     override val trackTypes: IntArray
         get() {
             // initialize graphHopper instance
-          val hopper = hopper
-          if (hopper == null) {
+            val hopper = hopper
+            if (hopper == null) {
                 Logger.logW(TAG, "getTrackTypes(), unable to initialize GraphHopper instance")
                 return IntArray(0)
             }
@@ -188,13 +188,9 @@ class RoutingService : ComputeTrackService() {
             setClass(this@RoutingService, SettingsActivity::class.java)
         }
 
-//    override fun getNumOfTransitPoints(): Int {
-//        return 2
-//    }
-
     override fun computeTrack(lv: LocusVersion?, params: ComputeTrackParameters): Track? {
         // check instance of GraphHopper
-      if (hopper == null) {
+        if (hopper == null) {
             Logger.logW(TAG, "computeTrack($params), unable to initialize GraphHopper instance")
             return null
         }
@@ -287,10 +283,14 @@ class RoutingService : ComputeTrackService() {
 
         if (!resp.hasErrors()) {
             val path = resp.best
-            Logger.logD(TAG, "found path with distance:" + path.distance / 1000f + ", nodes:" + path.points.size + ", time:"
-                    + time + " " + resp.debugInfo)
-            Logger.logD(TAG, "the route is " + (path.distance / 100).toInt() / 10f
-                    + "km long, time:" + path.time / 60000f + "min, debug:" + time)
+            Logger.logD(TAG, "found path with " +
+                    "distance:" + path.distance / 1000f + ", " +
+                    "nodes: ${path.points.size}, " +
+                    "time: $time, ${resp.debugInfo}")
+            Logger.logD(TAG, "the route " +
+                    "distance: ${(path.distance / 100).toInt() / 10f} km, " +
+                    "time: ${path.time / 60000f} min, " +
+                    "debug: $time")
             return createTrackFromResult(resp, instructions)
         } else {
             // notify on problems
@@ -469,7 +469,7 @@ class RoutingService : ComputeTrackService() {
         val dir = RAMDirectory(routingItem.path, true)
         val properties = StorableProperties(dir)
         if (!properties.loadExisting()) {
-          throw IllegalStateException("Cannot load properties to fetch EncodingManager configuration at: ${dir.location}")
+            throw IllegalStateException("Cannot load properties to fetch EncodingManager configuration at: ${dir.location}")
         }
 
         // following code is not necessary - GraphHopper will create proper EncodingManager on demand,
@@ -478,11 +478,11 @@ class RoutingService : ComputeTrackService() {
         // enableInstructions is true by default, but to make sure
         builder.setEnableInstructions(true)
         properties.get("graph.encoded_values").takeIf { it.isNotBlank() }?.let {
-          builder.addAll(gh.encodedValueFactory, it)
+            builder.addAll(gh.encodedValueFactory, it)
         }
         // GraphHopper doesn't expose flagEncoderFactory, but it is ok - stateless DefaultFlagEncoderFactory is used.
         properties.get("graph.flag_encoders").takeIf { it.isNotBlank() }?.let {
-          builder.addAll(DefaultFlagEncoderFactory(), it)
+            builder.addAll(DefaultFlagEncoderFactory(), it)
         }
 
         gh.encodingManager = builder.build()
