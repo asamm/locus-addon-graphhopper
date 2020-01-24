@@ -11,7 +11,7 @@
         android:label="@string/_app_name"
         android:name="com.asamm.locus.addon.graphhopper.MainApplication"
         android:icon="@drawable/ic_launcher"
-        android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
         android:largeHeap="true"
         android:allowBackup="false">
 
