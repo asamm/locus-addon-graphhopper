@@ -4,6 +4,8 @@ Add-on for [Locus Map](http://www.locusmap.eu) (Android) application, created to
 
 Add-on is based on [GraphHopper](https://graphhopper.com/) routing system.
 
+Ready to use [routing data](https://graphhopper.develar.org/) is available.
+
 ### Possible improvements
 
 - TODO
