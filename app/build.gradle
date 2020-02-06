@@ -10,8 +10,8 @@ android {
         minSdkVersion Integer.valueOf(PARAM_MIN_SDK_VERSION)
         targetSdkVersion Integer.valueOf(PARAM_TARGET_SDK_VERSION)
 
-        versionCode 17
-        versionName '0.8'
+        versionCode 18
+        versionName '0.9'
     }
 
     // exclude from result
