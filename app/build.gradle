@@ -81,7 +81,7 @@ dependencies {
     // add GraphHopper dependency
     // https://github.com/graphhopper/graphhopper/tree/master/android
     // https://mvnrepository.com/artifact/com.graphhopper/graphhopper-core
-    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '1.0-pre18') {
+    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '1.0-pre20') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
         exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
         exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
