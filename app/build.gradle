@@ -3,15 +3,15 @@ apply plugin: "kotlin-android"
 
 android {
     // defaults
-    compileSdkVersion Integer.valueOf(PARAM_COMPILE_SDK_VERSION)
-    buildToolsVersion ANDROID_BUILD_TOOLS
+    compileSdkVersion Versions.compileSdk
+    buildToolsVersion Versions.buildTools
 
     defaultConfig {
-        minSdkVersion Integer.valueOf(PARAM_MIN_SDK_VERSION)
-        targetSdkVersion Integer.valueOf(PARAM_TARGET_SDK_VERSION)
+        minSdkVersion Versions.minSdk
+        targetSdkVersion Versions.targetSdk
 
-        versionCode 18
-        versionName '0.9'
+        versionCode App.code
+        versionName App.name
     }
 
     // exclude from result
@@ -69,11 +69,11 @@ android {
 }
 
 dependencies {
-    implementation project(":library")
+    implementation project(Modules.library)
 
     // Locus API
-    implementation 'com.asamm:locus-api-android:' + LIB_LOCUS_API
+    implementation LibrariesApi.locusApiAndroid
 
     // Android support libraries
-    implementation 'androidx.appcompat:appcompat:' + LIB_ANDROID_SUPPORT
+    implementation LibrariesAndroidX.appCompat
 }

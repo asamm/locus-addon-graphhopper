@@ -6,10 +6,9 @@ buildscript {
     }
     dependencies {
         // Android build
-        classpath 'com.android.tools.build:gradle:' + ANDROID_PLUGIN_GRADLE
-
+        classpath Build.androidGradle
         // Kotlin
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:' + KOTLIN_VERSION
+        classpath Build.kotlin
     }
 }
 
@@ -17,15 +16,5 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven { url "https://oss.sonatype.org/content/groups/public/" }
     }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
-configurations.all {
-    // check for updates every build
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
