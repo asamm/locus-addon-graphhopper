@@ -1,0 +1,46 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion Integer.valueOf(PARAM_COMPILE_SDK_VERSION)
+    buildToolsVersion ANDROID_BUILD_TOOLS
+
+    defaultConfig {
+        minSdkVersion Integer.valueOf(PARAM_MIN_SDK_VERSION)
+        targetSdkVersion Integer.valueOf(PARAM_TARGET_SDK_VERSION)
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+        }
+    }
+
+    // Kotlin compiler, target JVM
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    // Kotlin support
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:' + KOTLIN_VERSION
+
+    // Locus API
+    implementation 'com.asamm:locus-api-android:' + LIB_LOCUS_API
+
+    // Android support libraries
+    implementation 'androidx.appcompat:appcompat:' + LIB_ANDROID_SUPPORT
+
+    // add GraphHopper dependency
+    // https://github.com/graphhopper/graphhopper/tree/master/android
+    // https://mvnrepository.com/artifact/com.graphhopper/graphhopper-core
+    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '1.0-pre20') {
+        exclude group: 'com.google.protobuf', module: 'protobuf-java'
+        exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
+        exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
+    }
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.slf4j:slf4j-android:1.7.25'
+}

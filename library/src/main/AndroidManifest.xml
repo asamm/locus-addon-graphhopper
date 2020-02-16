@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.asamm.locus.addon.graphhopper">
+
+    <!-- access to card -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:requestLegacyExternalStorage="true"
+        android:largeHeap="true">
+
+        <activity
+            android:name="com.asamm.locus.addon.graphhopper.SettingsActivity"
+            android:exported="true"/>
+
+        <!-- service that allows to compute routes.
+         Parameters:
+         'label' - visible as name of service in Locus
+         'intent-filter' - required to make service visible
+         -->
+        <service
+            android:name="com.asamm.locus.addon.graphhopper.RoutingService"
+            android:label="@string/fgh_service_title"
+            android:icon="@drawable/ic_launcher_xhdpi">
+
+            <intent-filter>
+                <action
+                    android:name="locus.api.android.ACTION_COMPUTE_TRACK_PROVIDER"/>
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>

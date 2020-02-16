@@ -5,21 +5,19 @@
 package com.asamm.locus.addon.graphhopper
 
 import android.Manifest
-import android.support.v7.app.AppCompatActivity
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
-
-import java.io.File
-
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import locus.api.utils.Logger
+import java.io.File
 
 /**
  * Visible activity with the routing service settings.
@@ -35,17 +33,17 @@ class SettingsActivity : AppCompatActivity() {
         // check also permissions on Android 6.0+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val granted = ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                Manifest.permission.READ_EXTERNAL_STORAGE)
             if (granted != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
-                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                        REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE)
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE)
             }
         }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
-            permissions: Array<String>, grantResults: IntArray) {
+        permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE) {
             refreshPageContent()
         } else {
@@ -104,11 +102,11 @@ class SettingsActivity : AppCompatActivity() {
         var selectedIndex = 0
         val currentItem = Utils.getCurrentRoutingItem(this)
         val data = arrayOfNulls<String>(dirs.size)
-        for (i in 0 until dirs.size) {
+        for (i in dirs.indices) {
             data[i] = dirs[i].name
-                    .replace("-gh", "")
-                    .replace("_", " ")
-                    .trim { it <= ' ' }
+                .replace("-gh", "")
+                .replace("_", " ")
+                .trim { it <= ' ' }
             if (dirs[i] == currentItem) {
                 selectedIndex = i
             }
@@ -116,9 +114,9 @@ class SettingsActivity : AppCompatActivity() {
 
         // set spinner chooser
         val spinnerArrayAdapter = ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, data)
+            android.R.layout.simple_spinner_item, data)
         spinnerArrayAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item)
+            android.R.layout.simple_spinner_dropdown_item)
         sp.adapter = spinnerArrayAdapter
         sp.setSelection(selectedIndex)
         sp.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

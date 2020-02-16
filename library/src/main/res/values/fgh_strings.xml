@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- title for the GraphHopper service -->
+    <string name="fgh_service_title" translatable="false">GraphHopper</string>
+
+</resources>
