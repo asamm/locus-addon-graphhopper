@@ -42,7 +42,7 @@ class RoutingService : ComputeTrackService() {
     private var hopper: GraphHopper? = null
         get() {
             val routingItem = Utils.getCurrentRoutingItem(this)?.absoluteFile
-                    ?: throw IllegalArgumentException("No valid routing item selected")
+                ?: throw IllegalArgumentException("No valid routing item selected")
             try {
                 // check current selected map
                 if (field == null || routingItem != lastRoutingItem) {
@@ -57,9 +57,9 @@ class RoutingService : ComputeTrackService() {
                     // initialize graphHopper
                     val load = gh.load(routingItem.path)
                     Logger.logD(TAG, "found graph ${gh.graphHopperStorage}, " +
-                            "nodes: ${gh.graphHopperStorage.nodes}, " +
-                            "path: ${routingItem.path}, " +
-                            "load: $load")
+                        "nodes: ${gh.graphHopperStorage.nodes}, " +
+                        "path: ${routingItem.path}, " +
+                        "load: $load")
 
                     // store result
                     if (load) {
@@ -252,25 +252,38 @@ class RoutingService : ComputeTrackService() {
 
         // finally compute
         return calcPath(params.locations,
-                vehicle, weighting,
-                if (params.hasDirection) params.currentDirection.toDouble() else java.lang.Double.NaN,
-                params.isComputeInstructions)
+            vehicle, weighting,
+            if (params.hasDirection) params.currentDirection.toDouble() else java.lang.Double.NaN,
+            params.isComputeInstructions)
     }
 
+    /**
+     * Calculate path based on defined parameters.
+     *
+     * @param locs list of pass points (locations that define segments)
+     * @param vehicle type ofthe vehicle
+     * @param weighting weighting of the vehicle
+     * @param firstPointDirection direction of current user movement
+     * @param instructions flag if instructions are wanted
+     */
     private fun calcPath(locs: Array<Location>, vehicle: String, weighting: String,
-            firstPointDirection: Double, instructions: Boolean): Track? {
+        @Suppress("UNUSED_PARAMETER") firstPointDirection: Double,
+        instructions: Boolean): Track? {
         Logger.logD(TAG, "calculating path for $vehicle")
         val sw = StopWatch().start()
 
         // define request and it's parameters
         val req = GHRequest(2)
         for (i in locs.indices) {
+            // disable heading usage
+            // IllegalArgumentException: The 'heading' parameter is currently not supported for speed mode, you need to disable speed mode with `ch.disable=true`. See issue #483
+            // https://github.com/graphhopper/graphhopper/issues/483
             val loc = locs[i]
-            if (i == 0) {
-                req.addPoint(GHPoint(loc.latitude, loc.longitude), firstPointDirection)
-            } else {
-                req.addPoint(GHPoint(loc.latitude, loc.longitude))
-            }
+//            if (i == 0) {
+//                req.addPoint(GHPoint(loc.latitude, loc.longitude), firstPointDirection)
+//            } else {
+            req.addPoint(GHPoint(loc.latitude, loc.longitude))
+//            }
         }
 
         req.vehicle = vehicle
@@ -284,13 +297,13 @@ class RoutingService : ComputeTrackService() {
         if (!resp.hasErrors()) {
             val path = resp.best
             Logger.logD(TAG, "found path with " +
-                    "distance:" + path.distance / 1000f + ", " +
-                    "nodes: ${path.points.size}, " +
-                    "time: $time, ${resp.debugInfo}")
+                "distance:" + path.distance / 1000f + ", " +
+                "nodes: ${path.points.size}, " +
+                "time: $time, ${resp.debugInfo}")
             Logger.logD(TAG, "the route " +
-                    "distance: ${(path.distance / 100).toInt() / 10f} km, " +
-                    "time: ${path.time / 60000f} min, " +
-                    "debug: $time")
+                "distance: ${(path.distance / 100).toInt() / 10f} km, " +
+                "time: ${path.time / 60000f} min, " +
+                "debug: $time")
             return createTrackFromResult(resp, instructions)
         } else {
             // notify on problems
@@ -334,7 +347,7 @@ class RoutingService : ComputeTrackService() {
                 val pt = Point()
                 pt.location = firstLoc
                 pt.addParameter(GeoDataExtra.PAR_RTE_POINT_ACTION,
-                        graphHopperActionToLocus(inst).id)
+                    graphHopperActionToLocus(inst).id)
 
                 // set name
                 if (inst.name.isNotEmpty()) {
@@ -343,15 +356,15 @@ class RoutingService : ComputeTrackService() {
 
                 // set speed and distance parameters
                 pt.addParameter(GeoDataExtra.PAR_RTE_DISTANCE_F,
-                        inst.distance.toString())
+                    inst.distance.toString())
                 pt.addParameter(GeoDataExtra.PAR_RTE_TIME_I,
-                        (inst.time / 1000.0).toInt())
+                    (inst.time / 1000.0).toInt())
                 track.waypoints.add(pt)
 
                 // use "Via instruction"
                 if (viaInstruction != null) {
                     pt.addParameter(GeoDataExtra.PAR_RTE_POINT_ACTION,
-                            PointRteAction.PASS_PLACE.id)
+                        PointRteAction.PASS_PLACE.id)
                     viaInstruction = null
                 }
 
