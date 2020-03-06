@@ -35,11 +35,11 @@ dependencies {
     // add GraphHopper dependency
     // https://github.com/graphhopper/graphhopper/tree/master/android
     // https://mvnrepository.com/artifact/com.graphhopper/graphhopper-core
-    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '1.0-pre20') {
+    implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '1.0-pre31') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
         exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
         exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
     }
-    implementation 'org.slf4j:slf4j-api:1.7.25'
-    implementation 'org.slf4j:slf4j-android:1.7.25'
+    implementation 'org.slf4j:slf4j-api:1.7.26'
+    implementation 'org.slf4j:slf4j-android:1.7.26'
 }
