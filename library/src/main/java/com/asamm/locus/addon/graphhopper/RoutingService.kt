@@ -11,8 +11,6 @@ import android.widget.Toast
 import com.graphhopper.GHRequest
 import com.graphhopper.GHResponse
 import com.graphhopper.GraphHopper
-import com.graphhopper.routing.util.DefaultFlagEncoderFactory
-import com.graphhopper.routing.util.EncodingManager
 import com.graphhopper.routing.util.FlagEncoderFactory
 import com.graphhopper.routing.weighting.FastestWeighting
 import com.graphhopper.routing.weighting.ShortestWeighting
@@ -98,11 +96,10 @@ class RoutingService : ComputeTrackService() {
 
             // load encoders
             val types = ArrayList<Int>()
-            val em = hopper.encodingManager
-            val profiles = hopper.chFactoryDecorator.chProfiles
+            val profiles = hopper.graphHopperStorage.chProfiles
 
             // get all encoders
-            for (enc in em.fetchEdgeEncoders()) {
+            for (enc in hopper.encodingManager.fetchEdgeEncoders()) {
 
                 // add car
                 when (val encType = enc.toString()) {
@@ -288,7 +285,7 @@ class RoutingService : ComputeTrackService() {
 
         req.vehicle = vehicle
         req.weighting = weighting
-        req.hints.put("instructions", instructions).put("douglas.minprecision", 1)
+        req.hints.putObject(Parameters.Routing.INSTRUCTIONS, instructions)
 
         // execute request
         val resp = hopper!!.route(req)
@@ -479,28 +476,13 @@ class RoutingService : ComputeTrackService() {
         gh.isAllowWrites = false
 
         // load properties file
+        // we cannot use gh.graphHopperStorage.properties because `elevation` must be set before creating graphHopperStorage
         val dir = RAMDirectory(routingItem.path, true)
         val properties = StorableProperties(dir)
         if (!properties.loadExisting()) {
             throw IllegalStateException("Cannot load properties to fetch EncodingManager configuration at: ${dir.location}")
         }
 
-        // following code is not necessary - GraphHopper will create proper EncodingManager on demand,
-        // but as in any case we load properties to configure CH and elevation, let's set EncodingManager explicitly
-        val builder = EncodingManager.Builder()
-        // enableInstructions is true by default, but to make sure
-        builder.setEnableInstructions(true)
-        properties.get("graph.encoded_values").takeIf { it.isNotBlank() }?.let {
-            builder.addAll(gh.encodedValueFactory, it)
-        }
-        // GraphHopper doesn't expose flagEncoderFactory, but it is ok - stateless DefaultFlagEncoderFactory is used.
-        properties.get("graph.flag_encoders").takeIf { it.isNotBlank() }?.let {
-            builder.addAll(DefaultFlagEncoderFactory(), it)
-        }
-
-        gh.encodingManager = builder.build()
-
-        gh.isCHEnabled = (properties.get("prepare.ch.done") == "true")
         gh.setElevation(properties.get("prepare.elevation_interpolation.done") == "true")
     }
 
