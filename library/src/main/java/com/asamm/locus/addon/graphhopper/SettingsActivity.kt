@@ -16,6 +16,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.asamm.locus.addon.graphhopper.library.R
 import locus.api.utils.Logger
 import java.io.File
 
