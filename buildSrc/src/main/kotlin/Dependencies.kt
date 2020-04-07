@@ -22,8 +22,8 @@ object Modules {
 }
 
 object App {
-    const val code = 18
-    const val name = "0.9"
+    const val code = 19
+    const val name = "0.10"
 }
 
 //*****************************************************
@@ -50,7 +50,7 @@ object Versions {
 
     // KOTLIN
 
-    const val kotlin = "1.3.60"
+    const val kotlin = "1.3.61"
 }
 
 /**

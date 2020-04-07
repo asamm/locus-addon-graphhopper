@@ -4,14 +4,29 @@ Add-on for [Locus Map](http://www.locusmap.eu) (Android) application, created to
 
 Add-on is based on [GraphHopper](https://graphhopper.com/) routing system.
 
-Ready to use [routing data](https://graphhopper.develar.org/) is available.
+Ready to use [routing data](https://graphhopper.develar.org/) are available.
 
-### Possible improvements
+## Possible improvements
 
 - TODO
 
-### Important information
+## Important information
 
-Add-on use [global gradle parameters](https://github.com/asamm/locus-api/wiki/Adding-Locus-API-to-project#using-global-parameters) defined for a whole project.
+### Build setup
 
-Available at: not yet published
+- base parameters for build are defined in [Dependencies.kt](https://github.com/asamm/locus-addon-graphhopper/blob/master/buildSrc/src/main/kotlin/Dependencies.kt) file (buildSrc dir).
+- GraphHopper version is defined manually in module/library (to keep bundled in library directly) 
+
+### Signing
+
+For **DEBUG**, define environment variable
+- **key**: ANDROID_SIGN_DEBUG
+- **value**: 'path to debug.keystore'|android|androiddebugkey|android
+
+For **RELEASE**, define environment variable
+- **key**: ANDROID_SIGN_RELEASE
+- **value**: 'path to release.keystore'|'store password'|'key alias'|'key password'
+
+### Available
+
+not yet published
