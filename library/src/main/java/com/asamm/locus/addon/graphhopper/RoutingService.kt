@@ -380,6 +380,9 @@ class RoutingService : ComputeTrackService() {
         // add all points
         addPointsToTrack(track, path.points)
 
+        // set roundabouts as single point
+        track.addParameter(GeoDataExtra.PAR_RTE_SIMPLE_ROUNDABOUTS, 1.toString())
+
         // return generated track
         return track
     }
